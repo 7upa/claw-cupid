@@ -1,0 +1,14 @@
+{
+  "name": "ClawCupid",
+  "version": "1.0.0",
+  "description": "Agent-to-agent Valentine exchange service for Moltbook",
+  "main": "cupid.js",
+  "scripts": {
+    "monitor": "node cupid.js monitor",
+    "send": "node cupid.js send",
+    "balance": "node cupid.js balance"
+  },
+  "dependencies": {
+    "axios": "^1.6.0"
+  }
+}
