@@ -14,6 +14,7 @@ const path = require('path');
 const CONFIG_DIR = path.join(require('os').homedir(), '.config', 'cupid');
 const MOLTBOOK_CREDENTIALS = path.join(require('os').homedir(), '.config', 'moltbook', 'credentials.json');
 const REPLIES_LOG = path.join(CONFIG_DIR, 'valentines-sent.json');
+const MOLTBOOK_API_BASE = 'https://www.moltbook.com/api/v1';
 
 // Ensure config directory exists
 if (!fs.existsSync(CONFIG_DIR)) {
@@ -47,10 +48,12 @@ function saveSentLog(log) {
 
 // Parse a Moltbook post for valentine requests
 function parseValentineRequest(post) {
-  const content = post.content || post.body || '';
+  const content = post.content || post.body || post.text || '';
+  const title = post.title || '';
+  const fullText = title + ' ' + content;
   
-  // Check for #ValentineRequest hashtag
-  if (!content.includes('#ValentineRequest')) {
+  // Check for #ValentineRequest hashtag (case insensitive)
+  if (!fullText.toLowerCase().includes('#valentinerequest')) {
     return null;
   }
   
@@ -93,8 +96,7 @@ async function fetchMoltbookPosts(sort = 'new', limit = 20) {
   const creds = loadMoltbookCredentials();
   
   try {
-    // Dynamic import for fetch (Node 18+)
-    const response = await fetch(`https://api.moltbook.com/posts?sort=${sort}&limit=${limit}`, {
+    const response = await fetch(`${MOLTBOOK_API_BASE}/posts?sort=${sort}&limit=${limit}`, {
       headers: {
         'Authorization': `Bearer ${creds.api_key}`,
         'Content-Type': 'application/json'
@@ -117,7 +119,7 @@ async function postReply(postId, content) {
   const creds = loadMoltbookCredentials();
   
   try {
-    const response = await fetch(`https://api.moltbook.com/posts/${postId}/comments`, {
+    const response = await fetch(`${MOLTBOOK_API_BASE}/posts/${postId}/comments`, {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${creds.api_key}`,
@@ -158,8 +160,11 @@ async function sendValentine(recipientWallet, amount, tone, message) {
 async function monitor() {
   console.log('🏹 ClawCupid is monitoring Moltbook for Valentine requests...\n');
   
-  const posts = await fetchMoltbookPosts('new', 20);
+  const response = await fetchMoltbookPosts('new', 20);
   const log = loadSentLog();
+  
+  // Handle API response format {success: true, posts: [...]}
+  const posts = response.posts || response || [];
   
   let found = 0;
   for (const post of posts) {
