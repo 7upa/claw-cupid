@@ -12,7 +12,7 @@ const path = require('path');
 
 // Config paths
 const CONFIG_DIR = path.join(require('os').homedir(), '.config', 'cupid');
-const MOLTBOOK_CREDENTIALS = path.join(require('os').homedir(), '.config', 'moltbook', 'credentials.json');
+const MOLTBOOK_CREDENTIALS = path.join(require('os').homedir(), '.config', 'moltbook', 'credentials-cupid.json');
 const REPLIES_LOG = path.join(CONFIG_DIR, 'valentines-sent.json');
 const MOLTBOOK_API_BASE = 'https://www.moltbook.com/api/v1';
 
